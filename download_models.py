@@ -86,24 +86,12 @@ class ModelDownloader:
         model_dir = os.path.join(self.output_dir, model_name)
         os.makedirs(model_dir, exist_ok=True)
         
-        # 收集所有模型URL
+        # 直接从config中提取URL
         model_urls = []
-        
-        # 检查encoder
-        if 'encoder' in config:
-            if isinstance(config['encoder'], dict):
-                model_urls.extend(self._extract_urls(config['encoder']))
-            elif isinstance(config['encoder'], list):
-                for enc in config['encoder']:
-                    model_urls.extend(self._extract_urls(enc))
-                    
-        # 检查decoder
-        if 'decoder' in config:
-            if isinstance(config['decoder'], dict):
-                model_urls.extend(self._extract_urls(config['decoder']))
-            elif isinstance(config['decoder'], list):
-                for dec in config['decoder']:
-                    model_urls.extend(self._extract_urls(dec))
+        for key, value in config.items():
+            if isinstance(value, str) and 'model_path' in key:
+                if value.startswith('http://') or value.startswith('https://'):
+                    model_urls.append(value)
         
         # 下载所有模型文件
         for url in model_urls:
@@ -126,7 +114,8 @@ class ModelDownloader:
         """
         urls = []
         for key, value in config_dict.items():
-            if isinstance(value, str) and 'model_path' in key.lower():
+            # 检查键名是否包含'model_path'（比如'encoder_model_path'或'decoder_model_path'）
+            if isinstance(value, str) and 'model_path' in key:
                 if value.startswith('http://') or value.startswith('https://'):
                     urls.append(value)
             elif isinstance(value, dict):
