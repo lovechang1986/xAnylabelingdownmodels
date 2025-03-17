@@ -68,6 +68,19 @@ class ModelDownloader:
         with open(yaml_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
             
+        # 如果配置是列表，取第一个元素
+        if isinstance(config, list):
+            if len(config) > 0:
+                config = config[0]
+            else:
+                print(f"警告: {yaml_file} 是空列表")
+                return
+            
+        # 确保config是字典类型
+        if not isinstance(config, dict):
+            print(f"警告: {yaml_file} 格式不正确，跳过处理")
+            return
+        
         # 获取模型名称作为文件夹名
         model_name = config.get('name', 'unknown')
         model_dir = os.path.join(self.output_dir, model_name)
